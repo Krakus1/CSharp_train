@@ -1,0 +1,19 @@
+# Pobierz wszystkie foldery i podfoldery, które zawierają "2024" w nazwie
+$folders = Get-ChildItem -Recurse -Directory -Filter "*2024*"
+
+# Iteruj przez każdy folder
+foreach ($folder in $folders) {
+    # Sprawdź, czy folder zawiera inne podfoldery
+    $subfolders = Get-ChildItem -Path $folder.FullName -Directory
+    if ($subfolders.Count -gt 0) {
+        Write-Output "Folder '$($folder.FullName)' zawiera podfoldery."
+    } else {
+        Write-Output "Folder '$($folder.FullName)' nie zawiera podfolderów."
+    }
+
+    # Zmień nazwę folderu
+    $newName = $folder.Name -replace "2024", "2025"
+    Rename-Item -Path $folder.FullName -NewName $newName
+}
+
+Write-Output "Zmiana nazw folderów zakończona."
