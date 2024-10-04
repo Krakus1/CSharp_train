@@ -17,3 +17,14 @@ foreach ($folder in $folders) {
 }
 
 Write-Output "Zmiana nazw folderów zakończona."
+
+
+$files = Get-ChildItem -Recurse -File -Filter "*_2024_*"
+
+# Iteruj przez każdy plik i zmień jego nazwę
+foreach ($file in $files) {
+    $newName = $file.Name -replace "_2024_", "_2025_"
+    Rename-Item -Path $file.FullName -NewName $newName
+}
+
+Write-Output "Zmiana nazw plików zakończona."
