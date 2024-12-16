@@ -1,0 +1,41 @@
+import pyodbc
+
+# Parametry połączenia - dostosuj do swojej bazy danych
+connection_string = (
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=nazwa_serwera\\instancja;"      # lub np. "SERVER=localhost"
+    "DATABASE=nazwa_bazy;"
+    "UID=uzytkownik;"
+    "PWD=haslo;"
+)
+
+# Ścieżki plików
+plik_zapytania = "zapytanie.sql"
+plik_wyjscie = "wynik.xml"
+
+def wczytaj_zapytanie_z_pliku(sciezka):
+    with open(sciezka, 'r', encoding='utf-8') as f:
+        return f.read()
+
+def wykonaj_zapytanie_i_zapisz_xml(conn_str, zapytanie, sciezka_wyjscie):
+    # Nawiązanie połączenia z bazą danych
+    with pyodbc.connect(conn_str) as conn:
+        cursor = conn.cursor()
+        # Uruchomienie zapytania
+        cursor.execute(zapytanie)
+        
+        # Załóżmy, że wynikiem jest jeden wiersz i jedna kolumna z XML
+        # W przypadku wielu wierszy należy odpowiednio to obsłużyć
+        wiersz = cursor.fetchone()
+        if wiersz and wiersz[0]:
+            xml_dane = wiersz[0]
+            # Zapisujemy do pliku
+            with open(sciezka_wyjscie, 'w', encoding='utf-8') as out:
+                out.write(xml_dane)
+            print(f"Zapisano wynik do pliku {sciezka_wyjscie}")
+        else:
+            print("Brak danych do zapisania.")
+
+if __name__ == "__main__":
+    zapytanie = wczytaj_zapytanie_z_pliku(plik_zapytania)
+    wykonaj_zapytanie_i_zapisz_xml(connection_string, zapytanie, plik_wyjscie)
