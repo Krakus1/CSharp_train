@@ -1,0 +1,63 @@
+Sub GenerateSQLInsert()
+    Dim ws As Worksheet
+    Dim lastRow As Long, lastCol As Integer
+    Dim sqlText As String
+    Dim tableName As String
+    Dim colNames As String
+    Dim rowValues As String
+    Dim rng As Range, cell As Range
+    Dim i As Integer, j As Integer
+    Dim sqlScript As String
+    
+    ' Ustawienie aktywnego arkusza
+    Set ws = ActiveSheet
+    
+    ' Określenie ostatniego wiersza w kolumnie A
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    ' Kolumny od A do X (24 kolumny)
+    lastCol = 24
+    
+    ' Pobranie nazwy tabeli od użytkownika
+    tableName = InputBox("Podaj nazwę tabeli dla SQL INSERT INTO:", "Nazwa tabeli")
+    If tableName = "" Then Exit Sub
+    
+    ' Pobranie nazw kolumn z pierwszego wiersza
+    colNames = ""
+    For i = 1 To lastCol
+        colNames = colNames & "[" & ws.Cells(1, i).Value & "], "
+    Next i
+    colNames = Left(colNames, Len(colNames) - 2) ' Usunięcie ostatniego przecinka i spacji
+    
+    ' Iteracja przez wiersze danych
+    sqlScript = ""
+    For i = 2 To lastRow ' Zaczynamy od drugiego wiersza, bo pierwszy to nagłówki
+        rowValues = ""
+        
+        For j = 1 To lastCol
+            ' Pobranie wartości komórki
+            Set cell = ws.Cells(i, j)
+            ' Obsługa różnych typów danych
+            If IsNumeric(cell.Value) And Not IsEmpty(cell.Value) Then
+                rowValues = rowValues & cell.Value & ", "
+            ElseIf IsDate(cell.Value) Then
+                rowValues = rowValues & "'" & Format(cell.Value, "yyyy-mm-dd") & "', "
+            Else
+                rowValues = rowValues & "'" & Replace(cell.Value, "'", "''") & "', "
+            End If
+        Next j
+        
+        rowValues = Left(rowValues, Len(rowValues) - 2) ' Usunięcie ostatniego przecinka i spacji
+        
+        ' Tworzenie zapytania SQL dla danego wiersza
+        sqlText = "INSERT INTO " & tableName & " (" & colNames & ") VALUES (" & rowValues & ");" & vbCrLf
+        sqlScript = sqlScript & sqlText
+    Next i
+    
+    ' Skopiowanie wynikowego SQL do schowka
+    Dim DataObj As Object
+    Set DataObj = CreateObject("MSForms.DataObject")
+    DataObj.SetText sqlScript
+    DataObj.PutInClipboard
+    
+    MsgBox "Zapytania SQL zostały wygenerowane i skopiowane do schowka!", vbInformation, "Gotowe"
+End Sub
