@@ -1,0 +1,31 @@
+
+SELECT * INTO dbo.view_zakonczone 
+FROM (
+
+WITH zakonczone AS (
+    SELECT 
+        l.kon_id,
+        YEAR(l.to_date) AS rok,
+        MONTH(l.to_date) AS miesiac,
+        COUNT(*) AS liczba_zakonczonych
+    FROM ludzie l
+    WHERE 
+        l.to_date IS NOT NULL
+        AND l.rec_status = 1
+    GROUP BY 
+        l.kon_id, 
+        YEAR(l.to_date), 
+        MONTH(l.to_date)
+)
+SELECT 
+    k.kon_nr,
+    z.rok,
+    z.miesiac,
+    z.liczba_zakonczonych
+FROM zakonczone z
+JOIN kontrakty k ON k.kon_id = z.kon_id
+ORDER BY 
+    k.kon_nr, z.rok, z.miesiac;
+
+
+) x;
